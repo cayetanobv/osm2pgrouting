@@ -27,6 +27,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "osm_elements/Node.h"
 #include "osm_elements/Way.h"
@@ -90,11 +91,18 @@ class Export2DB {
                  const std::string &table) const {
              auto osm_table = m_tables.get_table(table);
              std::vector<std::string> values(items.size(), "");
-
-             size_t i(0);
-             for (auto it = items.begin(); it != items.end(); ++it, ++i) {
-                 auto item = *it;
-                 values[i] = tab_separated(item.values(osm_table.columns(), true));
+             try{
+               size_t i(0);
+               for (auto it = items.begin(); it != items.end(); ++it, ++i) {
+                   auto item = *it;
+                   values[i] = tab_separated(item.values(osm_table.columns(), true));
+                   if (table == "osm_relations"){
+                      std::cout << "\nNEW ROW XXXX\t" << values[i];
+                      std::cout << "\n-- XXXX\t" << i;
+                   }
+               }
+             } catch (const std::bad_alloc& e) {
+                std::cout << "\nERROR: " << e.what() << '\n';
              }
 
              export_osm(values, osm_table);
